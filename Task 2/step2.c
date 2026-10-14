@@ -1,19 +1,26 @@
 #include <stdio.h>
 
-unsigned char buf[1000000];
+int buf[1000000];
 
-int main()
+int main(void)
 {
     FILE *fp;
-    int n, i;
+    int c, n, i;
     int pos = -1;
 
+    /* read step1.png one byte at a time into buf */
     fp = fopen("step1.png", "rb");
     if (fp == NULL) {
         printf("could not open step1.png\n");
         return 1;
     }
-    n = fread(buf, 1, 1000000, fp);
+    n = 0;
+    c = fgetc(fp);
+    while (c != EOF) {
+        buf[n] = c;
+        n++;
+        c = fgetc(fp);
+    }
     fclose(fp);
     printf("size = %d\n", n);
 
@@ -23,7 +30,7 @@ int main()
             printf("IEND letters at %d\n", i);
             /* if the chunk does not end the file, it is the fake one */
             if (i + 8 < n && pos == -1)
-                pos = i - 4;   
+                pos = i - 4;
         }
     }
 
@@ -39,7 +46,8 @@ int main()
     n = n - 12;
 
     fp = fopen("step2.png", "wb");
-    fwrite(buf, 1, n, fp);
+    for (i = 0; i < n; i++)
+        fputc(buf[i], fp);
     fclose(fp);
     printf("saved step2.png, size = %d\n", n);
     return 0;
